@@ -15,8 +15,7 @@
   <script>if(!window.React){document.write('<scr'+'ipt src="https://unpkg.com/react@18/umd/react.production.min.js"><\/scr'+'ipt>')}</script>
   <script crossorigin src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
   <script>if(!window.ReactDOM){document.write('<scr'+'ipt src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"><\/scr'+'ipt>')}</script>
-  <!-- Supabase (optional — Demo-Modus funktioniert ohne) -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Phase 2: iServ OAuth wird hier eingebunden -->
 
   <style>
     /* ═══════════════════════════════════════════════════
@@ -571,6 +570,166 @@
     }
     .login-demo-btn:hover { border-color: var(--primary); color: var(--primary); }
 
+    /* ── PIN Login Additions ────────────────────────── */
+    .login-select {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 15px;
+      font-family: var(--font);
+      outline: none;
+      transition: border-color var(--transition);
+      background: var(--bg-card);
+      -webkit-appearance: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      cursor: pointer;
+    }
+    .login-select:focus { border-color: var(--primary); }
+
+    .pin-input-group {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin: 16px 0;
+    }
+
+    .pin-digit {
+      width: 48px;
+      height: 56px;
+      text-align: center;
+      font-size: 24px;
+      font-weight: 700;
+      font-family: var(--font);
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      outline: none;
+      transition: border-color var(--transition);
+      -webkit-text-security: disc;
+    }
+    .pin-digit:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+
+    .login-info {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 8px;
+      line-height: 1.4;
+    }
+
+    .login-switch {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .login-switch-btn {
+      background: none;
+      border: none;
+      color: var(--primary);
+      font-size: 13px;
+      font-family: var(--font);
+      cursor: pointer;
+      padding: 8px 16px;
+    }
+    .login-switch-btn:hover { text-decoration: underline; }
+
+    .remembered-users {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+
+    .remembered-chip {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border: 2px solid var(--border);
+      border-radius: 24px;
+      background: var(--bg-card);
+      cursor: pointer;
+      font-size: 14px;
+      font-family: var(--font);
+      transition: all var(--transition);
+    }
+    .remembered-chip:hover, .remembered-chip.selected {
+      border-color: var(--primary);
+      background: var(--primary-light);
+    }
+
+    .remembered-chip .chip-avatar {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    /* ── Lock Screen ──────────────────────────────── */
+    .lock-screen {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100dvh;
+      background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+      padding: 20px;
+    }
+
+    .lock-card {
+      background: var(--bg-card);
+      border-radius: 16px;
+      padding: 40px 32px;
+      max-width: 360px;
+      width: 100%;
+      box-shadow: var(--shadow-lg);
+      text-align: center;
+    }
+
+    .lock-avatar {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 22px;
+      font-weight: 700;
+      margin: 0 auto 12px;
+    }
+
+    .lock-card h2 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .lock-card p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+
+    .lock-other-btn {
+      margin-top: 12px;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 12px;
+      font-family: var(--font);
+      cursor: pointer;
+    }
+    .lock-other-btn:hover { color: var(--primary); }
+
     /* ── User Menu Dropdown ───────────────────────── */
     .user-menu {
       position: absolute;
@@ -745,11 +904,14 @@
 
     // ── Config ─────────────────────────────────────
     const CONFIG = {
-      SUPABASE_URL: 'https://ooejsfixxiuobrpqgfqm.supabase.co',
-      SUPABASE_KEY: '', // TODO: anon key hier eintragen — leer = Demo-Modus
       APP_NAME: 'KRS Hub',
       SCHOOL_NAME: 'Kurpfalz-Realschule Schriesheim',
-      INACTIVITY_TIMEOUT: 30 * 60 * 1000, // 30 Minuten (Shared-iPad-Sicherheit)
+      VERSION: '2.0.0-phase1',
+      INACTIVITY_TIMEOUT: 10 * 60 * 1000, // 10 Minuten → Lock-Screen (Shared-iPad-Schutz)
+      SESSION_MAX_DAYS: 7,
+      PIN_MAX_ATTEMPTS: 5,
+      PIN_LOCKOUT_MINUTES: 15,
+      PIN_PEPPER: 'KRS-Hub-2026-Schriesheim',
       ALLOWED_ORIGINS: [
         window.location.origin,
         'https://benditot.github.io'
@@ -779,20 +941,41 @@
           url: 'https://benditot.github.io/ipad-buchung/',
           color: '#7c3aed'
         }
-      ]
+      ],
+      // Phase 2: iServ OAuth (vorbereitet, noch nicht aktiv)
+      ISERV: {
+        ENABLED: false,
+        BASE_URL: 'https://krs.sh-schulen.de',
+        AUTH_ENDPOINT: '/iserv/auth/auth',
+        TOKEN_ENDPOINT: '/iserv/auth/public/token',
+        USERINFO_ENDPOINT: '/iserv/auth/userinfo',
+        SCOPES: 'openid profile email groups iserv:uuid iserv:roles'
+      }
     };
 
-    // ── Supabase Client ────────────────────────────
-    const isDemo = !CONFIG.SUPABASE_KEY || typeof window.supabase === 'undefined';
-    let sb = null;
-    try {
-      if (!isDemo && window.supabase) {
-        sb = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
-      }
-    } catch (err) {
-      console.warn('Supabase init failed, running in demo mode:', err);
-    }
-    if (isDemo) console.log('%c🧪 KRS Hub Demo-Modus aktiv', 'color:#d97706;font-weight:bold;font-size:14px');
+    // ── Lehrkräfte der KRS (Admin-vorbefüllte Liste) ─
+    // → Nur diese Personen können sich registrieren
+    // → Kürzel + Name müssen übereinstimmen
+    // → Wird in Phase 2 durch iServ-Gruppen ersetzt
+    const LEHRKRAEFTE = [
+      { kuerzel: 'Ko', name: 'Kotzan', vorname: 'Norbert', role: 'admin', avatar_color: '#7c6ff7' },
+      { kuerzel: 'Ca', name: 'Carse', vorname: 'Petra', role: 'admin', avatar_color: '#e74c8b' },
+      { kuerzel: 'Sch', name: 'Schmitt', vorname: 'Daniel', role: 'admin', avatar_color: '#2563eb' },
+      { kuerzel: 'Jo', name: 'Joos', vorname: 'Nadine', role: 'teacher', avatar_color: '#16a34a' },
+      { kuerzel: 'Ja', name: 'Jacob', vorname: 'Charlotte', role: 'teacher', avatar_color: '#d97706' },
+      { kuerzel: 'Sp', name: 'Spingel', vorname: 'Silke', role: 'teacher', avatar_color: '#0ea5e9' },
+      { kuerzel: 'Ma', name: 'Martinez', vorname: 'Manuel', role: 'teacher', avatar_color: '#dc2626' },
+      { kuerzel: 'PSch', name: 'Schmitt P.', vorname: 'Peter', role: 'teacher', avatar_color: '#8b5cf6' },
+      { kuerzel: 'Scha', name: 'Scharmann', vorname: 'Katharina', role: 'teacher', avatar_color: '#ec4899' },
+      { kuerzel: 'We', name: 'Weber', vorname: 'Julia', role: 'teacher', avatar_color: '#14b8a6' },
+      { kuerzel: 'Ge', name: 'Gehrig', vorname: 'Denise', role: 'teacher', avatar_color: '#f59e0b' },
+      { kuerzel: 'Fi', name: 'Fischer', vorname: '', role: 'teacher', avatar_color: '#6366f1' },
+      { kuerzel: 'Mü', name: 'Müller', vorname: '', role: 'teacher', avatar_color: '#84cc16' },
+      // ── Weitere Lehrkräfte hier ergänzen ──
+      // { kuerzel: 'XX', name: 'Nachname', vorname: 'Vorname', role: 'teacher', avatar_color: '#...' },
+    ];
+
+    console.log('%c🏫 KRS Hub v' + CONFIG.VERSION + ' — Phase 1 (PIN-Login)', 'color:#2563eb;font-weight:bold;font-size:14px');
 
     // ── Toast System ───────────────────────────────
     let toastId = 0;
@@ -832,61 +1015,236 @@
       );
     }
 
-    // ── Demo Users ─────────────────────────────────
-    const DEMO_USERS = [
-      { id: 'demo-1', email: 'norbert@demo.krs', display_name: 'Norbert K.', kuerzel: 'NK', role: 'admin', avatar_color: '#7c6ff7' },
-      { id: 'demo-2', email: 'petra@demo.krs', display_name: 'Petra C.', kuerzel: 'PC', role: 'admin', avatar_color: '#e74c8b' },
-      { id: 'demo-3', email: 'daniel@demo.krs', display_name: 'Daniel S.', kuerzel: 'DS', role: 'teacher', avatar_color: '#2563eb' },
-      { id: 'demo-4', email: 'sabine@demo.krs', display_name: 'Sabine M.', kuerzel: 'SM', role: 'teacher', avatar_color: '#16a34a' },
-    ];
+    // ═══════════════════════════════════════════════
+    // PIN AUTH SERVICE — Phase 1 (client-seitig)
+    // ═══════════════════════════════════════════════
 
-    // ── Auth Service ───────────────────────────────
-    const AuthService = {
-      async getSession() {
-        if (isDemo) {
-          const stored = sessionStorage.getItem('krs-hub-demo-user');
-          return stored ? JSON.parse(stored) : null;
+    const PinAuthService = {
+      // ── Crypto Helpers (PBKDF2 mit 200k Iterationen) ──
+      async hashPin(pin, salt = null) {
+        if (!salt) {
+          salt = new Uint8Array(16);
+          crypto.getRandomValues(salt);
+        } else if (typeof salt === 'string') {
+          salt = new Uint8Array(salt.match(/.{2}/g).map(b => parseInt(b, 16)));
         }
-        const { data: { session } } = await sb.auth.getSession();
-        return session;
+        const saltHex = Array.from(salt).map(b => b.toString(16).padStart(2,'0')).join('');
+        // PBKDF2: PIN + Pepper als Key-Material, Salt, 200k Iterationen
+        const keyMaterial = await crypto.subtle.importKey(
+          'raw', new TextEncoder().encode(pin + CONFIG.PIN_PEPPER), 'PBKDF2', false, ['deriveBits']
+        );
+        const derivedBits = await crypto.subtle.deriveBits(
+          { name: 'PBKDF2', salt, iterations: 200000, hash: 'SHA-256' }, keyMaterial, 256
+        );
+        const hashHex = Array.from(new Uint8Array(derivedBits)).map(b => b.toString(16).padStart(2,'0')).join('');
+        return { salt: saltHex, hash: hashHex };
       },
 
-      async signInWithMagicLink(email) {
-        if (isDemo) {
-          const user = DEMO_USERS.find(u => u.email === email) || {
-            id: 'demo-' + Date.now(),
-            email,
-            display_name: email.split('@')[0],
-            kuerzel: email.split('@')[0].substring(0, 2).toUpperCase(),
-            role: 'teacher',
-            avatar_color: '#' + Math.floor(Math.random()*16777215).toString(16)
-          };
-          sessionStorage.setItem('krs-hub-demo-user', JSON.stringify({ user }));
-          return { success: true, demo: true };
-        }
-        const { error } = await sb.auth.signInWithOtp({
-          email,
-          options: { emailRedirectTo: window.location.origin + window.location.pathname }
-        });
-        if (error) throw error;
-        return { success: true };
+      async verifyPin(pin, storedSalt, storedHash) {
+        const { hash } = await this.hashPin(pin, storedSalt);
+        // Constant-time comparison to prevent timing attacks
+        if (hash.length !== storedHash.length) return false;
+        let diff = 0;
+        for (let i = 0; i < hash.length; i++) diff |= hash.charCodeAt(i) ^ storedHash.charCodeAt(i);
+        return diff === 0;
       },
 
-      async signOut() {
-        if (isDemo) {
-          sessionStorage.removeItem('krs-hub-demo-user');
-          return;
-        }
-        await sb.auth.signOut();
+      // ── Storage Helpers ─────────────────────────
+      // localStorage: User-Liste (unkritisch: Kürzel, Name)
+      // sessionStorage: PIN-Hashes, aktive Session (weg bei Tab-Close)
+
+      getKnownUsers() {
+        try {
+          return JSON.parse(localStorage.getItem('krs_known_users') || '[]');
+        } catch { return []; }
       },
 
-      async getProfile(userId) {
-        if (isDemo) {
-          const session = JSON.parse(sessionStorage.getItem('krs-hub-demo-user'));
-          return session?.user || null;
+      saveKnownUsers(users) {
+        localStorage.setItem('krs_known_users', JSON.stringify(users));
+      },
+
+      getPinData() {
+        try {
+          return JSON.parse(sessionStorage.getItem('krs_pin_data') || '{}');
+        } catch { return {}; }
+      },
+
+      savePinData(data) {
+        sessionStorage.setItem('krs_pin_data', JSON.stringify(data));
+      },
+
+      getSession() {
+        try {
+          const sess = JSON.parse(sessionStorage.getItem('krs_session'));
+          if (!sess) return null;
+          // Prüfe Session-Ablauf (7 Tage)
+          const created = new Date(sess.created_at);
+          const maxAge = CONFIG.SESSION_MAX_DAYS * 24 * 60 * 60 * 1000;
+          if (Date.now() - created.getTime() > maxAge) {
+            this.clearSession();
+            return null;
+          }
+          return sess;
+        } catch { return null; }
+      },
+
+      saveSession(kuerzel) {
+        sessionStorage.setItem('krs_session', JSON.stringify({
+          user_kuerzel: kuerzel,
+          created_at: new Date().toISOString(),
+          last_activity: new Date().toISOString(),
+          login_method: 'pin'
+        }));
+      },
+
+      updateActivity() {
+        try {
+          const sess = JSON.parse(sessionStorage.getItem('krs_session'));
+          if (sess) {
+            sess.last_activity = new Date().toISOString();
+            sessionStorage.setItem('krs_session', JSON.stringify(sess));
+          }
+        } catch {}
+      },
+
+      clearSession() {
+        sessionStorage.removeItem('krs_session');
+      },
+
+      // ── Lockout (Brute-Force-Schutz) ───────────
+      getLockout(kuerzel) {
+        try {
+          const data = JSON.parse(sessionStorage.getItem('krs_lockout_' + kuerzel) || '{}');
+          if (data.locked_until && new Date(data.locked_until) > new Date()) {
+            return data;
+          }
+          if (data.locked_until) {
+            sessionStorage.removeItem('krs_lockout_' + kuerzel);
+            return { attempts: 0 };
+          }
+          return data;
+        } catch { return { attempts: 0 }; }
+      },
+
+      recordFailedAttempt(kuerzel) {
+        const data = this.getLockout(kuerzel);
+        data.attempts = (data.attempts || 0) + 1;
+        if (data.attempts >= CONFIG.PIN_MAX_ATTEMPTS) {
+          data.locked_until = new Date(Date.now() + CONFIG.PIN_LOCKOUT_MINUTES * 60 * 1000).toISOString();
         }
-        const { data } = await sb.from('profiles').select('*').eq('id', userId).single();
+        sessionStorage.setItem('krs_lockout_' + kuerzel, JSON.stringify(data));
         return data;
+      },
+
+      clearLockout(kuerzel) {
+        sessionStorage.removeItem('krs_lockout_' + kuerzel);
+      },
+
+      isLockedOut(kuerzel) {
+        const data = this.getLockout(kuerzel);
+        return data.locked_until && new Date(data.locked_until) > new Date();
+      },
+
+      getRemainingLockoutMinutes(kuerzel) {
+        const data = this.getLockout(kuerzel);
+        if (!data.locked_until) return 0;
+        const remaining = new Date(data.locked_until) - new Date();
+        return Math.max(0, Math.ceil(remaining / 60000));
+      },
+
+      // ── Main Auth Methods ──────────────────────
+      async setupPin(kuerzel, pin) {
+        const lehrkraft = LEHRKRAEFTE.find(l => l.kuerzel === kuerzel);
+        if (!lehrkraft) throw new Error('Kürzel nicht in Lehrkräfte-Liste');
+
+        const { salt, hash } = await this.hashPin(pin);
+
+        // PIN-Hash in sessionStorage (weg bei Tab-Close)
+        const pinData = this.getPinData();
+        pinData[kuerzel] = { salt, hash };
+        this.savePinData(pinData);
+
+        // User-Info in localStorage (unkritisch)
+        const users = this.getKnownUsers();
+        const existing = users.findIndex(u => u.kuerzel === kuerzel);
+        const userEntry = {
+          kuerzel: lehrkraft.kuerzel,
+          name: lehrkraft.name,
+          vorname: lehrkraft.vorname,
+          display_name: lehrkraft.vorname ? lehrkraft.vorname + ' ' + lehrkraft.name : lehrkraft.name,
+          role: lehrkraft.role,
+          avatar_color: lehrkraft.avatar_color,
+          registered_at: new Date().toISOString()
+        };
+        if (existing >= 0) users[existing] = userEntry;
+        else users.push(userEntry);
+        this.saveKnownUsers(users);
+
+        // Session starten
+        this.saveSession(kuerzel);
+        this.clearLockout(kuerzel);
+
+        return this.getProfile(kuerzel);
+      },
+
+      async loginWithPin(kuerzel, pin) {
+        if (this.isLockedOut(kuerzel)) {
+          const mins = this.getRemainingLockoutMinutes(kuerzel);
+          throw new Error('Konto gesperrt. Noch ' + mins + ' Min. warten.');
+        }
+
+        const pinData = this.getPinData();
+        const stored = pinData[kuerzel];
+        if (!stored) throw new Error('PIN nicht gesetzt. Bitte zuerst registrieren.');
+
+        const valid = await this.verifyPin(pin, stored.salt, stored.hash);
+        if (!valid) {
+          const lockout = this.recordFailedAttempt(kuerzel);
+          const remaining = CONFIG.PIN_MAX_ATTEMPTS - lockout.attempts;
+          if (remaining <= 0) {
+            throw new Error('Zu viele Fehlversuche! ' + CONFIG.PIN_LOCKOUT_MINUTES + ' Min. gesperrt.');
+          }
+          throw new Error('Falsche PIN. Noch ' + remaining + ' Versuch(e).');
+        }
+
+        this.clearLockout(kuerzel);
+        this.saveSession(kuerzel);
+        return this.getProfile(kuerzel);
+      },
+
+      getProfile(kuerzel) {
+        const users = this.getKnownUsers();
+        const user = users.find(u => u.kuerzel === kuerzel);
+        if (!user) return null;
+        return {
+          id: 'krs-' + kuerzel,
+          kuerzel: user.kuerzel,
+          display_name: user.display_name,
+          lehrkraft_name: user.name,
+          role: user.role,
+          avatar_color: user.avatar_color,
+          email: (user.name || '').toLowerCase() + '@realschule-schriesheim.de'
+        };
+      },
+
+      hasPin(kuerzel) {
+        const pinData = this.getPinData();
+        return !!pinData[kuerzel];
+      },
+
+      getRegisteredKuerzel() {
+        return this.getKnownUsers().map(u => u.kuerzel);
+      },
+
+      signOut() {
+        this.clearSession();
+      },
+
+      // Vollständiges Zurücksetzen (Admin-Funktion)
+      resetAll() {
+        sessionStorage.removeItem('krs_session');
+        sessionStorage.removeItem('krs_pin_data');
+        localStorage.removeItem('krs_known_users');
       }
     };
 
@@ -899,24 +1257,23 @@
 
     const moduleNonces = new Map();
 
-    function sendAuthToModule(iframe, moduleId, session, profile) {
+    function sendAuthToModule(iframe, moduleId, profile) {
       if (!iframe?.contentWindow) return;
       const nonce = createSecureNonce();
       moduleNonces.set(moduleId, nonce);
       iframe.contentWindow.postMessage({
         type: 'KRS_HUB_AUTH',
         nonce,
+        hub_verified: true,
         user: profile ? {
           id: profile.id,
           email: profile.email,
           display_name: profile.display_name,
           kuerzel: profile.kuerzel,
+          lehrkraft_name: profile.lehrkraft_name,
           role: profile.role,
           avatar_color: profile.avatar_color
-        } : null,
-        sessionToken: session?.access_token || null,
-        supabaseUrl: CONFIG.SUPABASE_URL,
-        supabaseKey: CONFIG.SUPABASE_KEY
+        } : null
       }, window.location.origin);
     }
 
@@ -946,65 +1303,352 @@
     // COMPONENTS
     // ═══════════════════════════════════════════════
 
-    // ── Login Screen ───────────────────────────────
-    function LoginScreen({ onLogin }) {
-      const [email, setEmail] = useState('');
+    // ── PIN Input Component ─────────────────────────
+    function PinInput({ value, onChange, length, autoFocus, disabled }) {
+      const inputRefs = useRef([]);
+      const pinLen = length || 4;
+
+      const handleChange = useCallback((index, val) => {
+        if (!/^\d*$/.test(val)) return;
+        const newPin = (value || '').split('');
+        newPin[index] = val.slice(-1);
+        const pinStr = newPin.join('').slice(0, pinLen);
+        onChange(pinStr);
+        if (val && index < pinLen - 1) {
+          inputRefs.current[index + 1]?.focus();
+        }
+      }, [value, onChange, pinLen]);
+
+      const handleKeyDown = useCallback((index, ev) => {
+        if (ev.key === 'Backspace' && !value?.[index] && index > 0) {
+          inputRefs.current[index - 1]?.focus();
+        }
+      }, [value]);
+
+      const handlePaste = useCallback((ev) => {
+        ev.preventDefault();
+        const pasted = ev.clipboardData.getData('text').replace(/\D/g, '').slice(0, pinLen);
+        onChange(pasted);
+        const focusIdx = Math.min(pasted.length, pinLen - 1);
+        inputRefs.current[focusIdx]?.focus();
+      }, [onChange, pinLen]);
+
+      return e('div', { className: 'pin-input-group' },
+        Array.from({ length: pinLen }, (_, i) =>
+          e('input', {
+            key: i,
+            ref: el => { inputRefs.current[i] = el; },
+            className: 'pin-digit',
+            type: 'tel',
+            inputMode: 'numeric',
+            maxLength: 1,
+            value: value?.[i] || '',
+            onChange: ev => handleChange(i, ev.target.value),
+            onKeyDown: ev => handleKeyDown(i, ev),
+            onPaste: i === 0 ? handlePaste : undefined,
+            autoFocus: autoFocus && i === 0,
+            disabled: disabled,
+            autoComplete: 'off'
+          })
+        )
+      );
+    }
+
+    // ── Login Screen (Kürzel + PIN) ──────────────────
+    function LoginScreen({ onLogin, onSetup }) {
+      const [kuerzel, setKuerzel] = useState('');
+      const [pin, setPin] = useState('');
       const [loading, setLoading] = useState(false);
       const [status, setStatus] = useState(null);
 
+      // Remembered users (those who have registered on this device)
+      const rememberedUsers = useMemo(() => PinAuthService.getKnownUsers(), []);
+
+      // Auto-select first remembered user
+      useEffect(() => {
+        if (rememberedUsers.length === 1) {
+          setKuerzel(rememberedUsers[0].kuerzel);
+        }
+      }, []);
+
       const handleSubmit = useCallback(async (ev) => {
         ev.preventDefault();
-        if (!email.trim()) return;
+        if (!kuerzel || pin.length < 4) return;
         setLoading(true);
         setStatus(null);
         try {
-          const result = await AuthService.signInWithMagicLink(email.trim());
-          if (result.demo) {
-            onLogin();
-          } else {
-            setStatus({ type: 'success', msg: 'Magic Link wurde gesendet! Prüfe dein E-Mail-Postfach (auch Spam-Ordner).' });
+          // Check if user has a PIN set up
+          if (!PinAuthService.hasPin(kuerzel)) {
+            // Redirect to setup
+            onSetup(kuerzel);
+            return;
           }
+          const profile = await PinAuthService.loginWithPin(kuerzel, pin);
+          onLogin(profile);
         } catch (err) {
-          setStatus({ type: 'error', msg: 'Fehler: ' + (err.message || 'Unbekannter Fehler') });
+          setStatus({ type: 'error', msg: err.message || 'Anmeldung fehlgeschlagen' });
+          setPin('');
         }
         setLoading(false);
-      }, [email, onLogin]);
+      }, [kuerzel, pin, onLogin, onSetup]);
 
-      const handleDemoLogin = useCallback(async () => {
-        setLoading(true);
-        await AuthService.signInWithMagicLink('norbert@demo.krs');
-        onLogin();
-      }, [onLogin]);
+      // Auto-submit when PIN is 4 digits
+      useEffect(() => {
+        if (pin.length === 4 && kuerzel && !loading) {
+          const form = document.querySelector('.login-card');
+          if (form) form.requestSubmit?.();
+        }
+      }, [pin, kuerzel, loading]);
+
+      const hasRegistered = rememberedUsers.length > 0;
 
       return e('div', { className: 'login-screen' },
         e('form', { className: 'login-card', onSubmit: handleSubmit },
           e('div', { className: 'login-logo' }, '🏫'),
           e('h1', null, CONFIG.APP_NAME),
-          e('p', null, CONFIG.SCHOOL_NAME, e('br'), 'Melde dich mit deiner Schul-E-Mail an.'),
-          e('input', {
-            className: 'login-input',
-            type: 'email',
-            placeholder: 'vorname@realschule-schriesheim.de',
-            value: email,
-            onChange: (ev) => setEmail(ev.target.value),
-            disabled: loading,
+          e('p', null, CONFIG.SCHOOL_NAME, e('br'), 'Melde dich mit Kürzel & PIN an.'),
+
+          // Quick-select remembered users
+          hasRegistered && e('div', { className: 'remembered-users' },
+            rememberedUsers.map(u =>
+              e('button', {
+                key: u.kuerzel,
+                type: 'button',
+                className: 'remembered-chip' + (kuerzel === u.kuerzel ? ' selected' : ''),
+                onClick: () => { setKuerzel(u.kuerzel); setPin(''); setStatus(null); }
+              },
+                e('span', { className: 'chip-avatar', style: { background: u.avatar_color || '#64748b' } }, u.kuerzel),
+                u.vorname || u.name
+              )
+            )
+          ),
+
+          // Kürzel dropdown (if no remembered user selected)
+          (!hasRegistered || !kuerzel) && e('select', {
+            className: 'login-select',
+            value: kuerzel,
+            onChange: ev => { setKuerzel(ev.target.value); setPin(''); setStatus(null); },
+            disabled: loading
+          },
+            e('option', { value: '' }, '— Kürzel wählen —'),
+            LEHRKRAEFTE.map(l =>
+              e('option', { key: l.kuerzel, value: l.kuerzel },
+                l.kuerzel + ' — ' + (l.vorname ? l.vorname + ' ' + l.name : l.name)
+              )
+            )
+          ),
+
+          // PIN input
+          kuerzel && e(PinInput, {
+            value: pin,
+            onChange: setPin,
+            length: 4,
             autoFocus: true,
-            autoComplete: 'email'
+            disabled: loading
           }),
-          e('button', {
+
+          kuerzel && e('button', {
             className: 'login-btn',
             type: 'submit',
-            disabled: loading || !email.trim()
-          }, loading ? 'Wird gesendet…' : 'Magic Link senden'),
+            disabled: loading || pin.length < 4
+          }, loading ? 'Anmelden…' : 'Anmelden'),
+
           status && e('div', { className: 'login-status ' + status.type }, status.msg),
-          e('div', { className: 'login-demo' },
+
+          // Switch to registration
+          e('div', { className: 'login-switch' },
             e('button', {
-              className: 'login-demo-btn',
+              className: 'login-switch-btn',
               type: 'button',
-              onClick: handleDemoLogin,
-              disabled: loading
-            }, '🧪 Demo-Modus starten')
+              onClick: () => {
+                if (kuerzel) onSetup(kuerzel);
+                else setStatus({ type: 'error', msg: 'Bitte zuerst ein Kürzel wählen.' });
+              }
+            }, 'Erstmals hier? PIN einrichten →')
           )
+        )
+      );
+    }
+
+    // ── PIN Setup Screen ─────────────────────────────
+    function PinSetupScreen({ initialKuerzel, onComplete, onBack }) {
+      const [kuerzel, setKuerzel] = useState(initialKuerzel || '');
+      const [pin, setPin] = useState('');
+      const [pinConfirm, setPinConfirm] = useState('');
+      const [step, setStep] = useState(1); // 1 = enter PIN, 2 = confirm PIN
+      const [loading, setLoading] = useState(false);
+      const [status, setStatus] = useState(null);
+
+      const lehrkraft = useMemo(() => LEHRKRAEFTE.find(l => l.kuerzel === kuerzel), [kuerzel]);
+
+      const handlePinSet = useCallback(() => {
+        if (pin.length < 4) {
+          setStatus({ type: 'error', msg: 'PIN muss 4 Ziffern haben.' });
+          return;
+        }
+        setStep(2);
+        setStatus(null);
+      }, [pin]);
+
+      const handleConfirm = useCallback(async () => {
+        if (pin !== pinConfirm) {
+          setStatus({ type: 'error', msg: 'PINs stimmen nicht überein. Bitte erneut.' });
+          setPinConfirm('');
+          return;
+        }
+        setLoading(true);
+        setStatus(null);
+        try {
+          const profile = await PinAuthService.setupPin(kuerzel, pin);
+          showToast('PIN eingerichtet! Willkommen, ' + (profile.display_name || kuerzel) + '!', 'success');
+          onComplete(profile);
+        } catch (err) {
+          setStatus({ type: 'error', msg: err.message || 'Fehler beim Einrichten' });
+        }
+        setLoading(false);
+      }, [pin, pinConfirm, kuerzel, onComplete]);
+
+      // Auto-advance when PIN confirm is 4 digits
+      useEffect(() => {
+        if (step === 2 && pinConfirm.length === 4) {
+          handleConfirm();
+        }
+      }, [pinConfirm, step, handleConfirm]);
+
+      return e('div', { className: 'login-screen' },
+        e('div', { className: 'login-card' },
+          e('div', { className: 'login-logo' }, '🔑'),
+          e('h1', null, 'PIN einrichten'),
+
+          // Kürzel selection
+          !kuerzel && e(React.Fragment, null,
+            e('p', null, 'Wähle dein Kürzel aus:'),
+            e('select', {
+              className: 'login-select',
+              value: kuerzel,
+              onChange: ev => setKuerzel(ev.target.value)
+            },
+              e('option', { value: '' }, '— Kürzel wählen —'),
+              LEHRKRAEFTE.map(l =>
+                e('option', { key: l.kuerzel, value: l.kuerzel },
+                  l.kuerzel + ' — ' + (l.vorname ? l.vorname + ' ' + l.name : l.name)
+                )
+              )
+            )
+          ),
+
+          // Show selected teacher
+          lehrkraft && e('p', null,
+            'Hallo, ', e('strong', null, lehrkraft.vorname + ' ' + lehrkraft.name), '!',
+            e('br'),
+            step === 1 ? 'Wähle eine 4-stellige PIN für den schnellen Login.' : 'Bitte PIN zur Bestätigung nochmal eingeben.'
+          ),
+
+          // Step 1: Enter PIN
+          lehrkraft && step === 1 && e(React.Fragment, null,
+            e(PinInput, {
+              value: pin,
+              onChange: setPin,
+              length: 4,
+              autoFocus: true,
+              disabled: loading
+            }),
+            e('button', {
+              className: 'login-btn',
+              type: 'button',
+              onClick: handlePinSet,
+              disabled: pin.length < 4
+            }, 'Weiter'),
+            e('div', { className: 'login-info' }, 'Die PIN wird nur auf diesem Gerät gespeichert.')
+          ),
+
+          // Step 2: Confirm PIN
+          lehrkraft && step === 2 && e(React.Fragment, null,
+            e(PinInput, {
+              value: pinConfirm,
+              onChange: setPinConfirm,
+              length: 4,
+              autoFocus: true,
+              disabled: loading
+            }),
+            e('button', {
+              className: 'login-btn',
+              type: 'button',
+              onClick: handleConfirm,
+              disabled: loading || pinConfirm.length < 4
+            }, loading ? 'Wird eingerichtet…' : 'PIN bestätigen')
+          ),
+
+          status && e('div', { className: 'login-status ' + status.type }, status.msg),
+
+          e('div', { className: 'login-switch' },
+            e('button', {
+              className: 'login-switch-btn',
+              type: 'button',
+              onClick: step === 2 ? () => { setStep(1); setPin(''); setPinConfirm(''); setStatus(null); } : onBack
+            }, step === 2 ? '← Andere PIN wählen' : '← Zurück zur Anmeldung')
+          )
+        )
+      );
+    }
+
+    // ── Lock Screen ──────────────────────────────────
+    function LockScreen({ profile, onUnlock, onSwitchUser }) {
+      const [pin, setPin] = useState('');
+      const [loading, setLoading] = useState(false);
+      const [status, setStatus] = useState(null);
+
+      const handleUnlock = useCallback(async () => {
+        if (pin.length < 4) return;
+        setLoading(true);
+        setStatus(null);
+        try {
+          const result = await PinAuthService.loginWithPin(profile.kuerzel, pin);
+          onUnlock(result);
+        } catch (err) {
+          setStatus({ type: 'error', msg: err.message || 'Falsche PIN' });
+          setPin('');
+        }
+        setLoading(false);
+      }, [pin, profile, onUnlock]);
+
+      // Auto-submit when PIN is 4 digits
+      useEffect(() => {
+        if (pin.length === 4 && !loading) {
+          handleUnlock();
+        }
+      }, [pin, loading, handleUnlock]);
+
+      return e('div', { className: 'lock-screen' },
+        e('div', { className: 'lock-card' },
+          e('div', { className: 'lock-avatar', style: { background: profile?.avatar_color || '#64748b' } },
+            profile?.kuerzel || '?'
+          ),
+          e('h2', null, profile?.display_name || 'Gesperrt'),
+          e('p', null, 'Bildschirm gesperrt wegen Inaktivität.', e('br'), 'PIN eingeben zum Entsperren.'),
+
+          e(PinInput, {
+            value: pin,
+            onChange: setPin,
+            length: 4,
+            autoFocus: true,
+            disabled: loading
+          }),
+
+          e('button', {
+            className: 'login-btn',
+            type: 'button',
+            onClick: handleUnlock,
+            disabled: loading || pin.length < 4
+          }, loading ? 'Prüfe…' : 'Entsperren'),
+
+          status && e('div', { className: 'login-status ' + status.type }, status.msg),
+
+          e('button', {
+            className: 'lock-other-btn',
+            type: 'button',
+            onClick: onSwitchUser
+          }, 'Anderer Benutzer')
         )
       );
     }
@@ -1268,16 +1912,16 @@
     }
 
     // ── Module Content (iframe loader) ─────────────
-    function ModuleContent({ activeModule, session, profile }) {
+    function ModuleContent({ activeModule, profile }) {
       const framesRef = useRef({});
 
       // Send auth to newly loaded iframe
       const handleIframeLoad = useCallback((moduleId) => {
         const iframe = framesRef.current[moduleId];
-        if (iframe && session && profile) {
-          sendAuthToModule(iframe, moduleId, session, profile);
+        if (iframe && profile) {
+          sendAuthToModule(iframe, moduleId, profile);
         }
-      }, [session, profile]);
+      }, [profile]);
 
       // Listen for auth requests from modules
       useEffect(() => {
@@ -1288,17 +1932,13 @@
             const moduleId = event.data.moduleId;
             const iframe = framesRef.current[moduleId];
             if (iframe) {
-              sendAuthToModule(iframe, moduleId, session, profile);
+              sendAuthToModule(iframe, moduleId, profile);
             }
-          }
-          // Unread count updates from modules
-          if (event.data?.type === 'KRS_HUB_UNREAD_UPDATE') {
-            // Handled by parent App component
           }
         };
         window.addEventListener('message', handler);
         return () => window.removeEventListener('message', handler);
-      }, [session, profile]);
+      }, [profile]);
 
       if (!activeModule) {
         return e(WelcomeScreen, { onModuleSelect: () => {}, profile });
@@ -1325,9 +1965,9 @@
     // ═══════════════════════════════════════════════
 
     function App() {
-      const [authState, setAuthState] = useState('loading'); // loading, login, authenticated
-      const [session, setSession] = useState(null);
+      const [authState, setAuthState] = useState('loading'); // loading, login, pin_setup, authenticated, locked
       const [profile, setProfile] = useState(null);
+      const [setupKuerzel, setSetupKuerzel] = useState('');
       const [activeModule, setActiveModule] = useState(null);
       const [showUserMenu, setShowUserMenu] = useState(false);
       const [unreadCounts, setUnreadCounts] = useState(new Map());
@@ -1335,17 +1975,16 @@
       // ── Hash Router ────────────────────────────
       useEffect(() => {
         const handleHash = () => {
-          const hash = window.location.hash.slice(2); // Remove #/
+          const hash = window.location.hash.slice(2);
           const mod = CONFIG.MODULES.find(m => m.id === hash);
           if (mod) setActiveModule(mod.id);
           else if (!hash) setActiveModule(null);
         };
         window.addEventListener('hashchange', handleHash);
-        handleHash(); // Initial
+        handleHash();
         return () => window.removeEventListener('hashchange', handleHash);
       }, []);
 
-      // Sync hash when activeModule changes
       useEffect(() => {
         const newHash = activeModule ? '#/' + activeModule : '#/';
         if (window.location.hash !== newHash) {
@@ -1353,58 +1992,44 @@
         }
       }, [activeModule]);
 
-      // ── Auth Check ─────────────────────────────
+      // ── Auth Check (PIN-based) ─────────────────
       useEffect(() => {
-        (async () => {
-          try {
-            const sess = await AuthService.getSession();
-            if (sess) {
-              setSession(sess);
-              const prof = await AuthService.getProfile(sess.user?.id || sess.user?.id);
-              setProfile(prof || sess.user);
-              setAuthState('authenticated');
-            } else {
-              setAuthState('login');
-            }
-          } catch (err) {
-            console.error('Auth check failed:', err);
+        const sess = PinAuthService.getSession();
+        if (sess) {
+          const prof = PinAuthService.getProfile(sess.user_kuerzel);
+          if (prof) {
+            setProfile(prof);
+            setAuthState('authenticated');
+          } else {
+            PinAuthService.clearSession();
             setAuthState('login');
           }
-        })();
-
-        // Listen for auth state changes (Magic Link callback)
-        if (sb) {
-          const { data: { subscription } } = sb.auth.onAuthStateChange(async (event, sess) => {
-            if (event === 'SIGNED_IN' && sess) {
-              setSession(sess);
-              const prof = await AuthService.getProfile(sess.user.id);
-              setProfile(prof || { id: sess.user.id, email: sess.user.email, display_name: sess.user.email.split('@')[0] });
-              setAuthState('authenticated');
-            } else if (event === 'SIGNED_OUT') {
-              setSession(null);
-              setProfile(null);
-              setAuthState('login');
-              setActiveModule(null);
-            }
-          });
-          return () => subscription?.unsubscribe();
+        } else {
+          setAuthState('login');
         }
       }, []);
 
-      // ── Inactivity Logout (Shared iPad) ────────
-      const handleInactivityLogout = useCallback(async () => {
-        showToast('Automatisch abgemeldet (Inaktivität)', 'info');
-        await AuthService.signOut();
-        setAuthState('login');
-        setSession(null);
-        setProfile(null);
-        setActiveModule(null);
-      }, []);
+      // ── Inactivity → Lock Screen ───────────────
+      const handleInactivityLock = useCallback(() => {
+        if (authState === 'authenticated' && profile) {
+          showToast('Bildschirm gesperrt (Inaktivität)', 'info');
+          setAuthState('locked');
+        }
+      }, [authState, profile]);
 
       useInactivityTimer(
         authState === 'authenticated' ? CONFIG.INACTIVITY_TIMEOUT : Infinity,
-        handleInactivityLogout
+        handleInactivityLock
       );
+
+      // ── Activity Tracking ─────────────────────
+      useEffect(() => {
+        if (authState !== 'authenticated') return;
+        const update = () => PinAuthService.updateActivity();
+        const events = ['mousedown', 'keydown', 'touchstart'];
+        events.forEach(ev => window.addEventListener(ev, update, { passive: true }));
+        return () => events.forEach(ev => window.removeEventListener(ev, update));
+      }, [authState]);
 
       // ── postMessage listener for unread ────────
       useEffect(() => {
@@ -1423,21 +2048,32 @@
       }, []);
 
       // ── Handlers ───────────────────────────────
-      const handleLogin = useCallback(async () => {
-        const sess = await AuthService.getSession();
-        if (sess) {
-          setSession(sess);
-          const prof = await AuthService.getProfile(sess.user?.id);
-          setProfile(prof || sess.user);
-          setAuthState('authenticated');
-          showToast('Willkommen!', 'success');
-        }
+      const handleLogin = useCallback((prof) => {
+        setProfile(prof);
+        setAuthState('authenticated');
+        showToast('Willkommen, ' + (prof.display_name || prof.kuerzel) + '!', 'success');
       }, []);
 
-      const handleLogout = useCallback(async () => {
-        await AuthService.signOut();
+      const handleSetup = useCallback((kuerzel) => {
+        setSetupKuerzel(kuerzel || '');
+        setAuthState('pin_setup');
+      }, []);
+
+      const handleSetupComplete = useCallback((prof) => {
+        setProfile(prof);
+        setAuthState('authenticated');
+      }, []);
+
+      const handleUnlock = useCallback((prof) => {
+        setProfile(prof);
+        setAuthState('authenticated');
+        PinAuthService.updateActivity();
+        showToast('Willkommen zurück!', 'success');
+      }, []);
+
+      const handleLogout = useCallback(() => {
+        PinAuthService.signOut();
         setAuthState('login');
-        setSession(null);
         setProfile(null);
         setActiveModule(null);
         setShowUserMenu(false);
@@ -1452,9 +2088,7 @@
       // ── Escape key ─────────────────────────────
       useEffect(() => {
         const handler = (ev) => {
-          if (ev.key === 'Escape') {
-            if (showUserMenu) setShowUserMenu(false);
-          }
+          if (ev.key === 'Escape' && showUserMenu) setShowUserMenu(false);
         };
         document.addEventListener('keydown', handler);
         return () => document.removeEventListener('keydown', handler);
@@ -1470,7 +2104,29 @@
 
       if (authState === 'login') {
         return e(React.Fragment, null,
-          e(LoginScreen, { onLogin: handleLogin }),
+          e(LoginScreen, { onLogin: handleLogin, onSetup: handleSetup }),
+          e(ToastContainer)
+        );
+      }
+
+      if (authState === 'pin_setup') {
+        return e(React.Fragment, null,
+          e(PinSetupScreen, {
+            initialKuerzel: setupKuerzel,
+            onComplete: handleSetupComplete,
+            onBack: () => setAuthState('login')
+          }),
+          e(ToastContainer)
+        );
+      }
+
+      if (authState === 'locked') {
+        return e(React.Fragment, null,
+          e(LockScreen, {
+            profile,
+            onUnlock: handleUnlock,
+            onSwitchUser: handleLogout
+          }),
           e(ToastContainer)
         );
       }
@@ -1493,7 +2149,7 @@
               showUserMenu
             }),
             activeModule
-              ? e(ModuleContent, { activeModule, session, profile })
+              ? e(ModuleContent, { activeModule, profile })
               : e(WelcomeScreen, { onModuleSelect: handleModuleSelect, profile }),
             e(MobileTabBar, { activeModule, onModuleSelect: handleModuleSelect, unreadCounts })
           )
