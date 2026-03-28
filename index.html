@@ -942,6 +942,11 @@
           color: '#7c3aed'
         }
       ],
+      EXTERNAL_LINKS: [
+        { id: 'homepage', name: 'Homepage', icon: '🌐', url: 'https://realschule-schriesheim.de/' },
+        { id: 'untis', name: 'Untis', icon: '📊', url: 'https://mese.webuntis.com/WebUntis/?school=KRS+Schriesheim#/basic/login' },
+        { id: 'kalender', name: 'Kalender', icon: '🗓️', url: 'https://realschule-schriesheim.de/terminuebersicht-im-kalenderformat/' }
+      ],
       // Phase 2: iServ OAuth (vorbereitet, noch nicht aktiv)
       ISERV: {
         ENABLED: false,
@@ -1674,6 +1679,27 @@
           )
         ),
 
+        // Separator
+        e('div', { style: { width: '80%', height: '1px', background: 'rgba(148,163,184,0.2)', margin: '8px auto' } }),
+
+        // Externe Links
+        e('div', { className: 'sidebar-nav', style: { flex: 'none' } },
+          CONFIG.EXTERNAL_LINKS.map(link =>
+            e('a', {
+              key: link.id,
+              className: 'nav-item',
+              href: link.url,
+              target: '_blank',
+              rel: 'noopener noreferrer',
+              title: link.name + ' (öffnet in neuem Tab)',
+              style: { textDecoration: 'none', color: 'inherit' }
+            },
+              e('span', { className: 'nav-icon' }, link.icon),
+              e('span', { className: 'nav-label' }, link.name)
+            )
+          )
+        ),
+
         e('div', { className: 'sidebar-footer' },
           profile?.role === 'admin' && e('button', {
             className: 'nav-item',
@@ -1747,12 +1773,15 @@
             }, unreadCounts.get(mod.id))
           )
         ),
-        e('button', {
+        e('a', {
           className: 'mobile-tab',
-          onClick: () => showToast('Einstellungen kommt in Phase 2', 'info')
+          href: 'https://realschule-schriesheim.de/',
+          target: '_blank',
+          rel: 'noopener noreferrer',
+          style: { textDecoration: 'none', color: 'inherit' }
         },
-          e('span', { className: 'mobile-tab-icon' }, '⚙️'),
-          e('span', null, 'Mehr')
+          e('span', { className: 'mobile-tab-icon' }, '🌐'),
+          e('span', null, 'Web')
         )
       );
     }
@@ -1825,6 +1854,21 @@
             },
               e('div', { className: 'module-card-icon' }, mod.icon),
               e('div', { className: 'module-card-title' }, mod.name)
+            )
+          ),
+          // Externe Links
+          CONFIG.EXTERNAL_LINKS.map(link =>
+            e('a', {
+              key: link.id,
+              className: 'module-card',
+              href: link.url,
+              target: '_blank',
+              rel: 'noopener noreferrer',
+              style: { textDecoration: 'none', color: 'inherit', opacity: 0.85 }
+            },
+              e('div', { className: 'module-card-icon' }, link.icon),
+              e('div', { className: 'module-card-title' }, link.name),
+              e('div', { style: { fontSize: '10px', color: 'var(--text-muted)', marginTop: '2px' } }, '↗')
             )
           )
         ),
